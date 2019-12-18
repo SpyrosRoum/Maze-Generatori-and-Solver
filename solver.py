@@ -1,6 +1,8 @@
 from PIL import Image
 import numpy as np
 
+import time
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -12,13 +14,20 @@ class Solver:
         (self.width, self.height) = maze.size
         self.pixels = np.array(maze)
 
-    def solve(self):
-        # Solves using dead-end filler algorithm
+    def dead_end_filler(self, time_it=False):
+        if time_it:
+            start_time = time.time()
+
         for row, col in self.dead_ends_gen():
             self.pixels[row][col] = RED
             while (next_ := self.next_dead(row, col)) != (None, None):
                 row, col = next_
                 self.pixels[row][col] = RED
+
+        if time_it:
+            took = time.time() - start_time
+            return Image.fromarray(self.pixels), took
+
         return Image.fromarray(self.pixels)
 
     def dead_ends_gen(self):
@@ -80,7 +89,7 @@ if __name__ == "__main__":
 
 
     solver = Solver(args.maze)
-    maze = solver.solve()
+    maze = solver.dead_end_filler()
     maze.save(args.output)
 
     # import timeit
